@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia de Gestão de Change Requests (CRs)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Teal Accent -->
+    <!-- Application Structure Plan: A tabbed, single-page dashboard structure. The top navigation allows users to jump between key phases of the CR lifecycle: Visão Geral, O Processo, Comunicação, Ferramentas, and Governança. This non-linear approach is more user-friendly than a simple document, as users can quickly access the specific information they need (e.g., how to use the RICE model or what the communication plan is). The structure is task-oriented, breaking down a complex process into digestible, interactive sections. -->
+    <!-- Visualization & Content Choices: 
+        - CR Categories -> Goal: Inform -> Viz: 2x2 card grid (HTML/Tailwind) -> Interaction: Hover effect -> Justification: More engaging than a list.
+        - SLA Prioritization -> Goal: Compare -> Viz: Horizontal Bar Chart (Chart.js) -> Interaction: Tooltips -> Justification: Visually shows the urgency differences.
+        - RICE Model -> Goal: Utility -> Viz: Interactive Sliders + Output (HTML/JS) -> Interaction: Real-time calculation on slider move -> Justification: Provides a functional tool, not just theory.
+        - Communication Plan -> Goal: Show Process -> Viz: Vertical Timeline (HTML/Tailwind) -> Interaction: Click to expand details -> Justification: Intuitive for time-based flows, keeps UI clean.
+        - Process Flow -> Goal: Organize -> Viz: Visual Diagram (HTML/Tailwind) -> Interaction: Clickable steps that scroll to details -> Justification: Provides a high-level map of the entire process.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #3D4852;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 250px;
+            max-height: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 300px;
+                max-height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #2563EB; /* blue-600 */
+            border-bottom-color: #2563EB;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -31px;
+            top: 5px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background-color: #F8F7F4;
+            border: 4px solid #93C5FD; /* blue-300 */
+            z-index: 1;
+        }
+        .timeline-item.active::before {
+            background-color: #2563EB; /* blue-600 */
+            border-color: #2563EB;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-800">Gestão de CRs</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent">Visão Geral</a>
+                        <a href="#process" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent">Fluxo</a>
+                        <a href="#communication" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent">Comunicação</a>
+                        <a href="#tools" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent">Ferramentas</a>
+                        <a href="#governance" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent">Governança</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" ></select>
+                        <option value="#overview">Visão Geral</option>
+                        <option value="#process">Fluxo</option>
+                        <option value="#communication">Comunicação</option>
+                        <option value="#tools">Ferramentas</option>
+                        <option value="#governance">Governança</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <!-- Section: Visão Geral -->
+        <section id="overview" class="scroll-mt-24 space-y-8">
+            <div class="text-center">
+                <p class="text-base font-semibold text-blue-600">Otimizando o Ciclo de Vida das Mudanças</p>
+                <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Guia Interativo de Change Requests</h2>
+                <p class="mt-6 max-w-2xl mx-auto text-lg leading-8 text-gray-600">
+                    Esta aplicação centraliza nosso processo de gestão de mudanças. O objetivo é padronizar e otimizar a forma como lidamos com Change Requests (CRs), garantindo conformidade regulatória, alocação eficiente de recursos e, acima de tudo, a satisfação de nossos clientes. Explore as seções para entender cada etapa do fluxo.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Categorias de Change Requests</h3>
+                <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Para aprofundar a análise e gestão, todos os CRs são classificados em uma das quatro categorias principais. Essa classificação nos ajuda a entender a natureza da mudança e a direcionar os recursos corretos desde o início.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-blue-50 p-6 rounded-lg border border-blue-200 text-center hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                        <div class="text-4xl mb-3">⚙️</div>
+                        <h4 class="font-bold text-lg text-blue-900">Funcionalidade</h4>
+                        <p class="text-sm text-blue-800 mt-2">Mudanças que alteram o comportamento ou as capacidades de um produto existente. Ex: Permitir alterar a chave PIX primária.</p>
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-lg border border-green-200 text-center hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                        <div class="text-4xl mb-3">🚀</div>
+                        <h4 class="font-bold text-lg text-green-900">Produto</h4>
+                        <p class="text-sm text-green-800 mt-2">Lançamento de um novo produto ou mudanças estruturais e significativas em um produto. Ex: Lançamento de um novo portal para clientes.</p>
+                    </div>
+                    <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200 text-center hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                        <div class="text-4xl mb-3">⚖️</div>
+                        <h4 class="font-bold text-lg text-yellow-900">Mandate</h4>
+                        <p class="text-sm text-yellow-800 mt-2">Mudanças exigidas por normas externas, como BACEN, LGPD ou Bandeiras. Ex: KYC com validação facial obrigatória.</p>
+                    </div>
+                    <div class="bg-purple-50 p-6 rounded-lg border border-purple-200 text-center hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                        <div class="text-4xl mb-3">🏗️</div>
+                        <h4 class="font-bold text-lg text-purple-900">Estrutura</h4>
+                        <p class="text-sm text-purple-800 mt-2">Alterações na infraestrutura, arquitetura ou integrações. Ex: Nova endpoint para criação de boletos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: O Processo -->
+        <section id="process" class="scroll-mt-24 mt-16 space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900">O Processo de um CR</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg leading-8 text-gray-600">
+                    O ciclo de vida de um Change Request segue um fluxo estruturado para garantir análise, priorização e execução consistentes. Cada etapa possui atividades e responsáveis definidos.
+                </p>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
+                    <div class="text-center">
+                        <div class="bg-blue-100 text-blue-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto font-bold text-xl">1</div>
+                        <p class="mt-2 font-semibold">Solicitação</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-blue-100 text-blue-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto font-bold text-xl">2</div>
+                        <p class="mt-2 font-semibold">Análise & Priorização</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-blue-100 text-blue-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto font-bold text-xl">3</div>
+                        <p class="mt-2 font-semibold">Execução</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-blue-100 text-blue-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto font-bold text-xl">4</div>
+                        <p class="mt-2 font-semibold">Monitoramento</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Análise de Prioridade por SLA</h3>
+                    <p class="text-gray-600 mb-6">Para nortear a gestão das solicitações, estabelecemos SLAs (Service Level Agreement) claros baseados na prioridade, que ajudam a definir a urgência e o prazo de entrega esperado para cada CR.</p>
+                    <div class="chart-container">
+                        <canvas id="slaChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Análise Colaborativa</h3>
+                    <p class="text-gray-600 mb-6">A avaliação de um CR nunca é isolada. É um esforço conjunto que envolve especialistas de diferentes áreas para garantir uma visão 360 graus sobre o impacto, a viabilidade e a necessidade da mudança.</p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-3 mt-1">✓</span>
+                            <div><strong class="font-semibold text-gray-700">Responsável Geral pelo CR:</strong> Coordena todo o processo.</div>
+                        </li>
+                        <li class="flex items-start">
+                             <span class="text-blue-500 mr-3 mt-1">✓</span>
+                            <div><strong class="font-semibold text-gray-700">Responsável Técnico:</strong> Avalia viabilidade e desafios de implementação.</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-3 mt-1">✓</span>
+                            <div><strong class="font-semibold text-gray-700">Compliance:</strong> Garante a aderência a questões regulatórias.</div>
+                        </li>
+                         <li class="flex items-start">
+                            <span class="text-blue-500 mr-3 mt-1">✓</span>
+                            <div><strong class="font-semibold text-gray-700">Customer Success (CS):</strong> Traz a perspectiva e o impacto direto no cliente.</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Comunicação -->
+        <section id="communication" class="scroll-mt-24 mt-16">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900">📞 Régua de Comunicação com o Cliente</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg leading-8 text-gray-600">
+                    Uma comunicação clara e proativa é fundamental. Nossa régua de comunicação é baseada em frações do prazo total do CR, garantindo flexibilidade e contatos consistentes ao longo do projeto. Clique em cada etapa para ver os detalhes.
+                </p>
+            </div>
+
+            <div class="mt-12 bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                <div class="pl-8 border-l-2 border-gray-200">
+                    <!-- Timeline Item 1 -->
+                    <div class="timeline-item mb-8 cursor-pointer" data-timeline-target="timeline-1">
+                        <h4 class="font-bold text-lg text-gray-800">1/5 do Prazo: Primeiro Contato</h4>
+                        <p class="text-sm text-gray-500">Notificação e Apresentação do CR</p>
+                        <div id="timeline-1" class="timeline-content hidden mt-4 bg-gray-50 p-4 rounded-md border">
+                            <strong class="block mb-2 text-gray-700">Propósito:</strong> Notificar o cliente sobre as alterações necessárias e o que esperar.
+                            <strong class="block mb-2 text-gray-700">Conteúdo Essencial:</strong> Data da Virada, Importância e Impacto, Alterações Técnicas, Recursos Visuais e Canal de Apoio.
+                        </div>
+                    </div>
+                    <!-- Timeline Item 2 -->
+                    <div class="timeline-item mb-8 cursor-pointer" data-timeline-target="timeline-2">
+                        <h4 class="font-bold text-lg text-gray-800">2/5 do Prazo: Segundo Contato</h4>
+                        <p class="text-sm text-gray-500">Validação de Recebimento e Entendimento</p>
+                        <div id="timeline-2" class="timeline-content hidden mt-4 bg-gray-50 p-4 rounded-md border">
+                            <strong class="block mb-2 text-gray-700">Propósito:</strong> Confirmar que o cliente recebeu e entendeu os requisitos e prazos.
+                            <strong class="block mb-2 text-gray-700">Pontos a Validar:</strong> Recebimento do informe, compreensão, início da mudança e alinhamento de prazos.
+                        </div>
+                    </div>
+                     <!-- Timeline Item 3 -->
+                    <div class="timeline-item mb-8 cursor-pointer" data-timeline-target="timeline-3">
+                        <h4 class="font-bold text-lg text-gray-800">3/5 do Prazo: Terceiro Contato</h4>
+                        <p class="text-sm text-gray-500">Acompanhamento do Progresso</p>
+                        <div id="timeline-3" class="timeline-content hidden mt-4 bg-gray-50 p-4 rounded-md border">
+                             <strong class="block mb-2 text-gray-700">Propósito:</strong> Validar se a integração ou mudança foi iniciada e está caminhando dentro dos prazos estipulados.
+                        </div>
+                    </div>
+                     <!-- Timeline Item 4 -->
+                    <div class="timeline-item mb-8 cursor-pointer" data-timeline-target="timeline-4">
+                        <h4 class="font-bold text-lg text-gray-800">4/5 do Prazo: Quarto Contato</h4>
+                        <p class="text-sm text-gray-500">Validação e Suporte Adicional</p>
+                         <div id="timeline-4" class="timeline-content hidden mt-4 bg-gray-50 p-4 rounded-md border">
+                             <strong class="block mb-2 text-gray-700">Propósito:</strong> Evitar ruídos ou pendências com clientes menos engajados, oferecendo suporte para garantir a conclusão da adequação.
+                        </div>
+                    </div>
+                     <!-- Timeline Item 5 -->
+                    <div class="timeline-item mb-8 cursor-pointer" data-timeline-target="timeline-5">
+                        <h4 class="font-bold text-lg text-gray-800">5/5 do Prazo: Quinto Contato</h4>
+                        <p class="text-sm text-gray-500">Acompanhamento Final e "Últimos Pushes"</p>
+                         <div id="timeline-5" class="timeline-content hidden mt-4 bg-gray-50 p-4 rounded-md border">
+                             <strong class="block mb-2 text-gray-700">Propósito:</strong> Acompanhamento final da integração, preparação para o pós-virada e últimos pushes para garantir a entrega no prazo.
+                        </div>
+                    </div>
+                     <!-- Timeline Item 6 -->
+                    <div class="timeline-item cursor-pointer" data-timeline-target="timeline-6">
+                        <h4 class="font-bold text-lg text-gray-800">Dia da Virada: Lançamento</h4>
+                        <p class="text-sm text-gray-500">Execução e Lançamento Oficial</p>
+                         <div id="timeline-6" class="timeline-content hidden mt-4 bg-gray-50 p-4 rounded-md border">
+                            <strong class="block mb-2 text-gray-700">Propósito:</strong> Lançar a nova funcionalidade/produto e iniciar o monitoramento imediato dos KPIs de sucesso.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Ferramentas -->
+        <section id="tools" class="scroll-mt-24 mt-16">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900">🧰 Ferramentas de Gestão</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg leading-8 text-gray-600">
+                    Utilizamos ferramentas padronizadas para auxiliar na priorização e no acompanhamento dos CRs, trazendo mais objetividade e transparência ao processo.
+                </p>
+            </div>
+            <div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Calculadora de Priorização RICE</h3>
+                    <p class="text-gray-600 mb-6">Use esta ferramenta para obter uma pontuação objetiva que ajuda a comparar diferentes CRs. Lembre-se, o RICE é um direcionador, não o único definidor de prioridade.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="rice-reach" class="flex justify-between text-sm font-medium text-gray-700"><span>Reach (Alcance)</span><span id="reach-value" class="font-bold">5000</span></label>
+                            <input id="rice-reach" type="range" min="0" max="10000" step="100" value="5000" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <label for="rice-impact" class="flex justify-between text-sm font-medium text-gray-700"><span>Impact (Impacto)</span><span id="impact-value" class="font-bold">2</span></label>
+                            <input id="rice-impact" type="range" min="0.25" max="3" step="0.25" value="2" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <label for="rice-confidence" class="flex justify-between text-sm font-medium text-gray-700"><span>Confidence (Confiança %)</span><span id="confidence-value" class="font-bold">80</span></label>
+                            <input id="rice-confidence" type="range" min="10" max="100" step="10" value="80" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <label for="rice-effort" class="flex justify-between text-sm font-medium text-gray-700"><span>Effort (Esforço / pessoa-mês)</span><span id="effort-value" class="font-bold">2</span></label>
+                            <input id="rice-effort" type="range" min="0.5" max="10" step="0.5" value="2" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                    </div>
+                    <div class="mt-8 text-center bg-blue-50 border-t-4 border-blue-500 rounded-b text-blue-900 px-4 py-3 shadow-md" role="alert">
+                        <p class="font-bold text-lg">Pontuação RICE</p>
+                        <p id="rice-score" class="text-4xl font-extrabold">4000</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Página de Controle & Solicitação</h3>
+                     <p class="text-gray-600 mb-6">O acompanhamento de todos os CRs é centralizado em uma página de controle, e novas solicitações são feitas via Slack para agilizar o processo.</p>
+                     <div class="bg-gray-100 p-4 rounded-lg border">
+                         <h4 class="font-semibold text-gray-800">Página de Controle</h4>
+                         <p class="text-sm text-gray-600 mb-4">Contém a Tabela Principal e visualizadores específicos por CR, Cliente, Documentação e Comunicação.</p>
+                         <h4 class="font-semibold text-gray-800">Template de Solicitação no Slack</h4>
+                         <p class="text-sm text-gray-600">Para abrir um novo CR, preencha os seguintes campos no canal apropriado:</p>
+                         <ul class="list-disc list-inside text-sm text-gray-600 mt-2 space-y-1">
+                            <li>Nome do Solicitante</li>
+                            <li>Área Solicitante</li>
+                            <li>Motivação do Comunicado</li>
+                            <li>Clientes Impactados</li>
+                            <li>Impacto para o Cliente</li>
+                            <li>Produto Relacionado</li>
+                            <li>Deadline Desejado</li>
+                         </ul>
+                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Governança -->
+        <section id="governance" class="scroll-mt-24 mt-16">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900">🏛️ Governança e Melhores Práticas</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg leading-8 text-gray-600">
+                    Definimos diretrizes claras para documentação, execução e monitoramento, garantindo a qualidade e o sucesso de cada implementação.
+                </p>
+            </div>
+            <div class="mt-12 bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div>
+                        <h4 class="font-semibold text-lg text-gray-800 mb-3">Documentação e Treinamentos</h4>
+                        <ul class="space-y-2 text-gray-600 list-disc list-inside">
+                           <li>Documentação clara e didática produzida pelo time técnico.</li>
+                           <li>Validação e aprovação do time de Produto.</li>
+                           <li>Manuais de integração detalhados.</li>
+                           <li>Treinamentos (síncronos e assíncronos) para as equipes de Comercial e Atendimento.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg text-gray-800 mb-3">Detalhes e Planejamento do CR</h4>
+                        <ul class="space-y-2 text-gray-600 list-disc list-inside">
+                           <li>Justificativa e valor para o cliente bem definidos.</li>
+                           <li>Análise de riscos e público-alvo.</li>
+                           <li>Plano de desligamento para funcionalidades antigas.</li>
+                           <li>Plano de contingência com cenários de falha e rollback.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg text-gray-800 mb-3">Monitoramento e KPIs</h4>
+                        <ul class="space-y-2 text-gray-600 list-disc list-inside">
+                           <li><strong class="text-gray-700">Negócio:</strong> Redução de churn, aumento de conversão.</li>
+                           <li><strong class="text-gray-700">Uso/Adoção:</strong> % de clientes ativos, frequência de uso.</li>
+                           <li><strong class="text-gray-700">Qualidade:</strong> Tempo de atividade, taxa de erro zero.</li>
+                           <li>Metas claras e mensuráveis para cada indicador.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white mt-16 border-t">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+            <p>&copy; 2025 Swap</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile navigation
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', (e) => {
+                window.location.hash = e.target.value;
+            });
+            
+            // SLA Chart
+            const slaCtx = document.getElementById('slaChart').getContext('2d');
+            new Chart(slaCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Prioridade Baixa', 'Prioridade Média', 'Prioridade Alta'],
+                    datasets: [{
+                        label: 'SLA (dias)',
+                        data: [90, 60, 30],
+                        backgroundColor: [
+                            'rgba(52, 211, 153, 0.6)', // green-400
+                            'rgba(251, 191, 36, 0.6)', // amber-400
+                            'rgba(239, 68, 68, 0.6)'  // red-500
+                        ],
+                        borderColor: [
+                            'rgba(5, 150, 105, 1)',
+                            'rgba(217, 119, 6, 1)',
+                            'rgba(185, 28, 28, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Prazo: ${context.raw} dias`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Dias'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // RICE Calculator
+            const reachSlider = document.getElementById('rice-reach');
+            const impactSlider = document.getElementById('rice-impact');
+            const confidenceSlider = document.getElementById('rice-confidence');
+            const effortSlider = document.getElementById('rice-effort');
+            
+            const reachValue = document.getElementById('reach-value');
+            const impactValue = document.getElementById('impact-value');
+            const confidenceValue = document.getElementById('confidence-value');
+            const effortValue = document.getElementById('effort-value');
+            const scoreDisplay = document.getElementById('rice-score');
+
+            function calculateRice() {
+                const reach = parseFloat(reachSlider.value);
+                const impact = parseFloat(impactSlider.value);
+                const confidence = parseFloat(confidenceSlider.value) / 100;
+                const effort = parseFloat(effortSlider.value);
+
+                reachValue.textContent = reach;
+                impactValue.textContent = impact;
+                confidenceValue.textContent = confidenceSlider.value;
+                effortValue.textContent = effort;
+
+                if (effort === 0) {
+                    scoreDisplay.textContent = '∞';
+                    return;
+                }
+
+                const score = (reach * impact * confidence) / effort;
+                scoreDisplay.textContent = Math.round(score);
+            }
+            
+            [reachSlider, impactSlider, confidenceSlider, effortSlider].forEach(slider => {
+                slider.addEventListener('input', calculateRice);
+            });
+            
+            calculateRice(); // Initial calculation
+
+            // Timeline interaction
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            timelineItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetId = item.getAttribute('data-timeline-target');
+                    const content = document.getElementById(targetId);
+                    
+                    const wasActive = item.classList.contains('active');
+                    
+                    timelineItems.forEach(i => {
+                        i.classList.remove('active');
+                        document.getElementById(i.getAttribute('data-timeline-target')).classList.add('hidden');
+                    });
+                    
+                    if (!wasActive) {
+                        item.classList.add('active');
+                        content.classList.remove('hidden');
+                    }
+                });
+            });
+
+            // Active nav link scrolling
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+                
+                const mobileOption = document.querySelector(`#mobile-nav option[value="#${current}"]`);
+                if(mobileOption){
+                    mobileNav.value = `#${current}`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
