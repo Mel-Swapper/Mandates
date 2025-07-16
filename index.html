@@ -9,16 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Warm Neutrals with Teal Accent -->
-    <!-- Application Structure Plan: A tabbed, single-page dashboard structure. The top navigation allows users to jump between key phases of the CR lifecycle: Visão Geral, O Processo, Comunicação, Ferramentas, and Governança. This non-linear approach is more user-friendly than a simple document, as users can quickly access the specific information they need (e.g., how to use the RICE model or what the communication plan is). The structure is task-oriented, breaking down a complex process into digestible, interactive sections. -->
-    <!-- Visualization & Content Choices: 
-        - CR Categories -> Goal: Inform -> Viz: 2x2 card grid (HTML/Tailwind) -> Interaction: Hover effect -> Justification: More engaging than a list.
-        - SLA Prioritization -> Goal: Compare -> Viz: Horizontal Bar Chart (Chart.js) -> Interaction: Tooltips -> Justification: Visually shows the urgency differences.
-        - RICE Model -> Goal: Utility -> Viz: Interactive Sliders + Output (HTML/JS) -> Interaction: Real-time calculation on slider move -> Justification: Provides a functional tool, not just theory.
-        - Communication Plan -> Goal: Show Process -> Viz: Vertical Timeline (HTML/Tailwind) -> Interaction: Click to expand details -> Justification: Intuitive for time-based flows, keeps UI clean.
-        - Process Flow -> Goal: Organize -> Viz: Visual Diagram (HTML/Tailwind) -> Interaction: Clickable steps that scroll to details -> Justification: Provides a high-level map of the entire process.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+  
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -168,7 +159,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
                 <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Análise de Prioridade por SLA</h3>
-                    <p class="text-gray-600 mb-6">Para nortear a gestão das solicitações, estabelecemos SLAs (Service Level Agreement) claros baseados na prioridade, que ajudam a definir a urgência e o prazo de entrega esperado para cada CR.</p>
+                    <p class="text-gray-600 mb-6">Para nortear a gestão das solicitações, estabelecemos SLAs claros baseados na prioridade, que ajudam a definir a urgência e o prazo de entrega esperado para cada CR.</p>
                     <div class="chart-container">
                         <canvas id="slaChart"></canvas>
                     </div>
